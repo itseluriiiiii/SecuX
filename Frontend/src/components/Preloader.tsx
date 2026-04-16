@@ -10,7 +10,7 @@ const loadingSteps = [
   "ESTABLISHING SECURE PIPELINE"
 ]
 
-export default function Preloader({ onComplete }) {
+export default function Preloader({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
 

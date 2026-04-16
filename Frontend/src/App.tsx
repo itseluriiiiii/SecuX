@@ -1,15 +1,15 @@
 import { useEffect, useState, useRef } from 'react'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
-import { Shield, Zap, Brain, Target, Terminal, ArrowRight, Search } from 'lucide-react'
+import { motion, useScroll, useTransform, AnimatePresence, Variants } from 'framer-motion'
+import { Shield, Zap, Brain, Target, Terminal, ArrowRight, Search, LucideIcon } from 'lucide-react'
 import './index.css'
 import Preloader from './components/Preloader'
 
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } }
 }
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -17,18 +17,28 @@ const staggerContainer = {
   }
 }
 
-const textBlurIn = {
+const textBlurIn: Variants = {
   hidden: { opacity: 0, filter: 'blur(10px)', y: 20 },
   visible: { opacity: 1, filter: 'blur(0px)', y: 0, transition: { duration: 1, ease: 'easeOut' } }
 }
 
+interface Particle {
+  x: number
+  y: number
+  size: number
+  speedX: number
+  speedY: number
+  opacity: number
+}
+
 function BackgroundEffects() {
-  const canvasRef = useRef(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
+    if (!ctx) return
     
     const resize = () => {
       canvas.width = window.innerWidth
@@ -37,7 +47,7 @@ function BackgroundEffects() {
     resize()
     window.addEventListener('resize', resize)
     
-    const particles = []
+    const particles: Particle[] = []
     for (let i = 0; i < 50; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -77,14 +87,14 @@ function BackgroundEffects() {
 function CursorGlow() {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   useEffect(() => {
-    const handleMove = (e) => setPosition({ x: e.clientX, y: e.clientY })
+    const handleMove = (e: MouseEvent) => setPosition({ x: e.clientX, y: e.clientY })
     window.addEventListener('mousemove', handleMove)
     return () => window.removeEventListener('mousemove', handleMove)
   }, [])
   return <div className='fixed w-[500px] h-[500px] rounded-full pointer-events-none z-0 transition-opacity duration-300' style={{ background: 'radial-gradient(circle, rgba(255, 199, 147, 0.04) 0%, transparent 70%)', left: position.x - 250, top: position.y - 250 }} />
 }
 
-function Hero({ isLoaded }) {
+function Hero({ isLoaded }: { isLoaded: boolean }) {
   const { scrollY } = useScroll()
   const y = useTransform(scrollY, [0, 500], [0, 100])
   
@@ -112,10 +122,11 @@ function Hero({ isLoaded }) {
         </motion.p>
         
         <motion.div variants={fadeInUp} className='flex flex-col sm:flex-row gap-4 md:gap-8 justify-center items-center'>
+          {/* Desktop Download Button */}
           <motion.button 
             whileHover={{ scale: 1.02, y: -2 }} 
             whileTap={{ scale: 0.98 }} 
-            className='group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-primary to-primary_container text-on_primary_fixed font-bold rounded-md flex items-center justify-center gap-3 transition-all ambient-glow text-xs md:text-base'
+            className='hidden md:flex group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-primary to-primary_container text-on_primary_fixed font-bold rounded-md items-center justify-center gap-3 transition-all ambient-glow text-xs md:text-base'
           >
             DOWNLOAD NOW
             <motion.div
@@ -125,6 +136,13 @@ function Hero({ isLoaded }) {
                 <ArrowRight className='w-5 h-5' />
             </motion.div>
           </motion.button>
+          
+          {/* Mobile Desktop Notice */}
+          <div className='flex md:hidden flex-col items-center gap-4 p-6 bg-surface_container rounded-lg border border-primary/10 ambient-glow'>
+              <Search className='w-8 h-8 text-primary opacity-50' />
+              <p className='text-[10px] uppercase tracking-[0.2em] font-bold text-primary'>Desktop Perspective Required</p>
+              <p className='text-[11px] text-on_surface_variant opacity-60 max-w-[240px]'>For full autonomous orchestration and vector analysis, please access SecuX from a laptop or PC.</p>
+          </div>
         </motion.div>
       </motion.div>
       
@@ -143,8 +161,14 @@ function Hero({ isLoaded }) {
   )
 }
 
+interface Step {
+  icon: LucideIcon
+  title: string
+  desc: string
+}
+
 function HowItWorks() {
-  const steps = [
+  const steps: Step[] = [
     { icon: Terminal, title: 'SYSTEM MAPPING', desc: 'Ingest architecture, APIs, and permission flows.' },
     { icon: Brain, title: 'AGENT ALLOCATION', desc: 'Autonomous LLM entities assigned specific threat profiles.' },
     { icon: Target, title: 'STRATEGY SYNTHESIS', desc: 'Deep-horizon simulations of SQLi, XSS, and lateral movement.' },
@@ -183,8 +207,14 @@ function HowItWorks() {
   )
 }
 
+interface Feature {
+  icon: LucideIcon
+  title: string
+  desc: string
+}
+
 function Features() {
-  const features = [
+  const features: Feature[] = [
     { icon: Brain, title: 'MULTI-AGENT ORCHESTRATION', desc: 'Multiple high-density models collaborating in a defensive matrix.' },
     { icon: Zap, title: 'LATENT THREAT SIMULATION', desc: 'Detecting vulnerabilities in the shadow space of your architecture.' },
     { icon: Target, title: 'VECTOR ANALYSIS', desc: 'Comprehensive mapping of SQLi, XSS, and complex lateral escalation.' },
@@ -262,7 +292,7 @@ function Footer() {
   )
 }
 
-function Navbar({ isLoaded }) {
+function Navbar({ isLoaded }: { isLoaded: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false)
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -290,7 +320,7 @@ function Navbar({ isLoaded }) {
           <motion.button 
             whileHover={{ scale: 1.05 }} 
             whileTap={{ scale: 0.95 }} 
-            className='text-[10px] uppercase tracking-[0.4em] font-black text-on_primary_fixed bg-primary px-8 py-3 rounded-md ambient-glow transition-all'
+            className='hidden md:block text-[10px] uppercase tracking-[0.4em] font-black text-on_primary_fixed bg-primary px-8 py-3 rounded-md ambient-glow transition-all'
           >
             DOWNLOAD
           </motion.button>
