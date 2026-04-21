@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence, Variants } from 'framer-motion'
-import { Shield, Zap, Brain, Target, Terminal, ArrowRight, Search, LucideIcon } from 'lucide-react'
+import { Shield, Zap, Brain, Target, Terminal, ArrowRight, Search, LucideIcon, Cpu, FileText, Activity } from 'lucide-react'
 import './index.css'
 import Preloader from './components/Preloader'
 
@@ -215,12 +215,15 @@ interface Feature {
 
 function Features() {
   const features: Feature[] = [
-    { icon: Brain, title: 'MULTI-AGENT ORCHESTRATION', desc: 'Multiple high-density models collaborating in a defensive matrix.' },
-    { icon: Zap, title: 'LATENT THREAT SIMULATION', desc: 'Detecting vulnerabilities in the shadow space of your architecture.' },
-    { icon: Target, title: 'VECTOR ANALYSIS', desc: 'Comprehensive mapping of SQLi, XSS, and complex lateral escalation.' },
-    { icon: Terminal, title: 'AUTONOMOUS STRATEGY', desc: 'The system thinks, learns, and builds its own offensive roadmap.' },
-    { icon: Shield, title: 'EDITORIAL DASHBOARD', desc: 'High-end technical reporting for absolute clarity in complex data.' },
-    { icon: Search, title: 'REAL-TIME MONITORING', desc: 'Continuous surveillance of system endpoints with zero-latency response.' },
+    { icon: Brain, title: 'MULTI-AGENT ORCHESTRATION', desc: 'Parallel execution of specialized AI entities across authentication, network, and vulnerability vectors.' },
+    { icon: Terminal, title: 'AUTONOMOUS LOG SCANNING', desc: 'Deep-horizon analysis of system archives to identify SQLi, XSS, and advanced persistent threat patterns.' },
+    { icon: Zap, title: 'INCREMENTAL INTELLIGENCE', desc: 'Real-time delta scanning of system logs to detect emerging anomalies with zero-latency response logic.' },
+    { icon: Search, title: 'NETWORK PATTERN ANALYSIS', desc: 'High-density surveillance of endpoint connectivity and packet flows to map unconventional traffic vectors.' },
+    { icon: Shield, title: 'AUTHENTICATION AUDIT', desc: 'Rigorous evaluation of identity security architectures and permission flows for bypass and escalation risks.' },
+    { icon: Target, title: 'SUPER AGENT CORRELATION', desc: 'A centralized cognitive layer that synthesizes multi-agent findings into a unified, actionable security roadmap.' },
+    { icon: Cpu, title: 'LOCAL LLM INTEGRATION', desc: 'Full utilization of local Ollama processing for private, secure intelligence without data leakage risks.' },
+    { icon: FileText, title: 'EDITORIAL AUDIT REPORTS', desc: 'Professional technical reporting providing absolute clarity and remediation logic for complex vulnerabilities.' },
+    { icon: Activity, title: 'VULNERABILITY ASSESSMENT', desc: 'Comprehensive mapping of architectural weaknesses through autonomous offensive simulations and impact analysis.' },
   ]
   return (
     <section id='features' className='relative py-32 md:py-64 px-6 bg-surface_container_lowest overflow-hidden'>

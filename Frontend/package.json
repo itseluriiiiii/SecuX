@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "powershell -Command \"& 'C:/Program Files/nodejs/node.exe' node_modules/vite/bin/vite.js\"",
+    "build": "powershell -Command \"& 'C:/Program Files/nodejs/node.exe' node_modules/vite/bin/vite.js build\"",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "powershell -Command \"& 'C:/Program Files/nodejs/node.exe' node_modules/vite/bin/vite.js preview\""
   },
   "dependencies": {
     "framer-motion": "^12.38.0",
