@@ -48,7 +48,7 @@ export default function Preloader({ onComplete }: { onComplete: () => void }) {
         transition={{ duration: 0.5 }}
         className="w-16 h-16 bg-primary rounded-md flex items-center justify-center ambient-glow mb-12"
       >
-        <Shield className="w-8 h-8 text-on_primary_fixed" />
+        <Shield className="w-8 h-8 text-[#000]" />
       </motion.div>
 
       <div className="w-full max-w-xs md:max-w-md">

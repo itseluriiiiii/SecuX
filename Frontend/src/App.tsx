@@ -60,7 +60,7 @@ function BackgroundEffects() {
     }
     
     const animate = () => {
-      ctx.fillStyle = '#0E0E0E'
+      ctx.fillStyle = '#000000'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       
       particles.forEach((p) => {
@@ -70,7 +70,7 @@ function BackgroundEffects() {
         if (p.y < 0 || p.y > canvas.height) p.speedY *= -1
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255, 199, 147, ${p.opacity})`
+        ctx.fillStyle = `rgba(0, 183, 181, ${p.opacity})`
         ctx.fill()
       })
       
@@ -91,7 +91,7 @@ function CursorGlow() {
     window.addEventListener('mousemove', handleMove)
     return () => window.removeEventListener('mousemove', handleMove)
   }, [])
-  return <div className='fixed w-[500px] h-[500px] rounded-full pointer-events-none z-0 transition-opacity duration-300' style={{ background: 'radial-gradient(circle, rgba(255, 199, 147, 0.04) 0%, transparent 70%)', left: position.x - 250, top: position.y - 250 }} />
+  return <div className='fixed w-[500px] h-[500px] rounded-full pointer-events-none z-0 transition-opacity duration-300' style={{ background: 'radial-gradient(circle, rgba(0, 183, 181, 0.04) 0%, transparent 70%)', left: position.x - 250, top: position.y - 250 }} />
 }
 
 function Hero({ isLoaded }: { isLoaded: boolean }) {
@@ -123,10 +123,12 @@ function Hero({ isLoaded }: { isLoaded: boolean }) {
         
         <motion.div variants={fadeInUp} className='flex flex-col sm:flex-row gap-4 md:gap-8 justify-center items-center'>
           {/* Desktop Download Button */}
-          <motion.button 
+          <motion.a 
+            href="/secux_backend.zip"
+            download="secux_backend.zip"
             whileHover={{ scale: 1.02, y: -2 }} 
             whileTap={{ scale: 0.98 }} 
-            className='hidden md:flex group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-primary to-primary_container text-on_primary_fixed font-bold rounded-md items-center justify-center gap-3 transition-all ambient-glow text-xs md:text-base'
+            className='hidden md:flex group w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-gradient-to-r from-primary to-primary_container text-[#000] font-bold rounded-md items-center justify-center gap-3 transition-all ambient-glow text-xs md:text-base cursor-pointer'
           >
             DOWNLOAD NOW
             <motion.div
@@ -135,7 +137,7 @@ function Hero({ isLoaded }: { isLoaded: boolean }) {
             >
                 <ArrowRight className='w-5 h-5' />
             </motion.div>
-          </motion.button>
+          </motion.a>
           
           {/* Mobile Desktop Notice */}
           <div className='flex md:hidden flex-col items-center gap-4 p-6 bg-surface_container rounded-lg border border-primary/10 ambient-glow'>
@@ -268,11 +270,14 @@ function Footer() {
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
             <div className='flex items-center gap-4 mb-2'>
               <div className='w-12 h-12 bg-primary rounded-md flex items-center justify-center ambient-glow'>
-                <Shield className='w-6 h-6 text-on_primary_fixed' />
+                <Shield className='w-6 h-6 text-[#000]' />
               </div>
               <span className='text-3xl font-bold font-display tracking-tight text-on_surface'>SECUX<span className='text-primary opacity-50'>.</span></span>
             </div>
             <p className='text-on_surface_variant font-light text-xs tracking-widest opacity-60'>EDITORIAL SECURITY INTELLIGENCE</p>
+            <p className='text-on_surface_variant font-light text-sm mt-4 max-w-md opacity-40 leading-relaxed'>
+              SecuX is a high-performance, AI-driven cybersecurity orchestration platform. It utilizes a network of specialized AI agents to perform deep security audits, reconstruct complex attack chains, and provide actionable intelligence from raw system telemetry.
+            </p>
           </motion.div>
         </div>
         
@@ -281,7 +286,7 @@ function Footer() {
             {teamMembers.map((member, i) => (
               <motion.span 
                 key={i} 
-                whileHover={{ scale: 1.1, color: '#FFC793' }}
+                whileHover={{ scale: 1.1, color: '#00B7B5' }}
                 className='text-[10px] font-bold uppercase tracking-widest text-on_surface_variant opacity-40 hover:opacity-100 transition-all cursor-pointer'
               >
                 {member}
@@ -313,20 +318,22 @@ function Navbar({ isLoaded }: { isLoaded: boolean }) {
       <div className='max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between'>
         <div className='flex items-center gap-4'>
           <div className='w-10 h-10 bg-primary rounded-md flex items-center justify-center ambient-glow'>
-            <Shield className='w-6 h-6 text-on_primary_fixed' />
+            <Shield className='w-6 h-6 text-[#000]' />
           </div>
           <span className='text-2xl font-bold font-display tracking-tight text-on_surface'>SECUX</span>
         </div>
         <div className='hidden md:flex items-center gap-8 lg:gap-16'>
           <a href='#features' className='text-[10px] uppercase tracking-[0.4em] font-bold text-on_surface_variant hover:text-primary transition-colors'>FEATURES</a>
 
-          <motion.button 
+          <motion.a 
+            href="/secux_backend.zip"
+            download="secux_backend.zip"
             whileHover={{ scale: 1.05 }} 
             whileTap={{ scale: 0.95 }} 
-            className='hidden md:block text-[10px] uppercase tracking-[0.4em] font-black text-on_primary_fixed bg-primary px-8 py-3 rounded-md ambient-glow transition-all'
+            className='hidden md:block text-[10px] uppercase tracking-[0.4em] font-black text-[#000] bg-primary px-8 py-3 rounded-md ambient-glow transition-all cursor-pointer'
           >
             DOWNLOAD
-          </motion.button>
+          </motion.a>
         </div>
         <div className='md:hidden'>
           <div className='pulse-indicator' />
@@ -340,7 +347,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
 
   return (
-    <div className='relative selection:bg-primary selection:text-on_primary_fixed'>
+    <div className='relative selection:bg-primary selection:text-[#000]'>
       <AnimatePresence>
         {isLoading && (
           <Preloader onComplete={() => setIsLoading(false)} />

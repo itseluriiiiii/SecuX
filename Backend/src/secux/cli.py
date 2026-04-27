@@ -31,8 +31,8 @@ def show_banner():
         force_terminal=True,
         file=open(sys.stdout.fileno(), mode='w', encoding='utf-8', closefd=False)
     )
-    console.print(f"[bold green]{SECUX_BANNER}[/bold green]")
-    console.print("[bold green]   Multi-Agent Security Audit & Log Analysis System[/bold green]\n")
+    console.print(f"[bold #00B7B5]{SECUX_BANNER}[/bold #00B7B5]")
+    console.print("[bold #00B7B5]   Multi-Agent Security Audit & Log Analysis System[/bold #00B7B5]\n")
 
 @click.group(invoke_without_command=True)
 @click.version_option(version="0.1.0")
@@ -187,7 +187,7 @@ def run_single_scan(
         )
         
         if show_summary and output:
-            click.echo(f"\n[green]Results saved to:[/green] {output.absolute()}")
+            click.echo(f"\n[#00B7B5]Results saved to:[/#00B7B5] {output.absolute()}")
         
     except Exception as e:
         click.echo(f"[red]Error during analysis:[/red] {str(e)}", err=True)
@@ -208,11 +208,11 @@ def run_monitoring(
     
     console = Console()
     
-    console.print(f"[cyan]Starting continuous monitoring mode...[/cyan]")
-    console.print(f"[cyan]Interval:[/cyan] {interval}s")
-    console.print(f"[cyan]Timeframe:[/cyan] {timeframe}h")
-    console.print(f"[cyan]Output:[/cyan] {output}")
-    console.print("[yellow]Press Ctrl+C to stop[/yellow]\n")
+    console.print(f"[#00B7B5]Starting continuous monitoring mode...[/#00B7B5]")
+    console.print(f"[#00B7B5]Interval:[/#00B7B5] {interval}s")
+    console.print(f"[#00B7B5]Timeframe:[/#00B7B5] {timeframe}h")
+    console.print(f"[#00B7B5]Output:[/#00B7B5] {output}")
+    console.print("[#005461]Press Ctrl+C to stop[/#005461]\n")
     
     last_scan = datetime.now(timezone.utc)
     agent = LogAnalysisAgent(
@@ -222,7 +222,7 @@ def run_monitoring(
     
     try:
         while True:
-            with console.status(f"[cyan]Scanning logs...[/cyan]") as status:
+            with console.status(f"[#00B7B5]Scanning logs...[/#00B7B5]") as status:
                 result = agent.run_incremental(
                     log_paths=paths,
                     since=last_scan
@@ -231,8 +231,8 @@ def run_monitoring(
                 new_entries, new_findings = result
                 
                 if new_entries or new_findings:
-                    console.print(f"\n[green]New events detected:[/green] {len(new_entries)}")
-                    console.print(f"[yellow]New findings:[/yellow] {len(new_findings)}")
+                    console.print(f"\n[#00B7B5]New events detected:[/#00B7B5] {len(new_entries)}")
+                    console.print(f"[#005461]New findings:[/#005461] {len(new_findings)}")
                     
                     for finding in new_findings[:3]:
                         console.print(f"  - [{finding.severity}] {finding.description[:70]}")
@@ -256,7 +256,7 @@ def run_monitoring(
             time.sleep(interval)
             
     except KeyboardInterrupt:
-        console.print("\n[cyan]Monitoring stopped.[/cyan]")
+        console.print("\n[#00B7B5]Monitoring stopped.[/#00B7B5]")
 
 
 @cli.command("audit")
@@ -323,11 +323,11 @@ def run_full_audit(timeframe: int, severity_threshold: str, paths: list = None):
         force_terminal=True,
         file=open(sys.stdout.fileno(), mode='w', encoding='utf-8', closefd=False)
     )
-    console.print("\n[bold cyan]>>> Initializing Fast Parallel Multi-Agent Security Audit[/bold cyan]")
+    console.print("\n[bold #00B7B5]>>> Initializing Fast Parallel Multi-Agent Security Audit[/bold #00B7B5]")
     console.print(f"[dim]Timeframe: {timeframe}h | Threshold: {severity_threshold}[/dim]\n")
 
     # PHASE 1 & 1.5: Parallel Data Collection & Base Log Analysis
-    console.print("[bold yellow]Phase 1: Concurrent Data Collection & Log Analysis...[/bold yellow]")
+    console.print("[bold #00B7B5]Phase 1: Concurrent Data Collection & Log Analysis...[/bold #00B7B5]")
     collector = DataCollector()
     log_agent = LogAnalysisAgent(timeframe_hours=timeframe, severity_threshold=severity_threshold)
 
@@ -337,23 +337,23 @@ def run_full_audit(timeframe: int, severity_threshold: str, paths: list = None):
         future_net_data = executor.submit(collector.get_network_context)
         future_vuln_data = executor.submit(collector.get_vulnerability_context)
 
-        with console.status("[bold blue]Collecting multi-source intelligence...[/bold blue]"):
+        with console.status("[bold #00B7B5]Collecting multi-source intelligence...[/bold #00B7B5]"):
             log_results = future_log_results.result()
-            console.print("  [blue]|--[/blue] Base Log Analysis: [green]OK[/green]")
+            console.print("  [#005461]|--[/#005461] Base Log Analysis: [#00B7B5]OK[/#00B7B5]")
             
             net_context = future_net_data.result()
-            console.print("  [blue]|--[/blue] Network Context: [green]OK[/green]")
+            console.print("  [#005461]|--[/#005461] Network Context: [#00B7B5]OK[/#00B7B5]")
             
             vuln_context = future_vuln_data.result()
-            console.print("  [blue]|--[/blue] Vulnerability Context: [green]OK[/green]")
+            console.print("  [#005461]|--[/#005461] Vulnerability Context: [#00B7B5]OK[/#00B7B5]")
 
     # PHASE 1.6: Dependent Data Collection (must follow Log Analysis)
-    with console.status("[bold yellow]Phase 1.5: Finalizing Auth Context...[/bold yellow]"):
+    with console.status("[bold #00B7B5]Phase 1.5: Finalizing Auth Context...[/bold #00B7B5]"):
         auth_context = collector.get_auth_context(log_results.get("findings", []))
-        console.print("[green]OK[/green] Auth Intelligence Context Prepared")
+        console.print("[#00B7B5]OK[/#00B7B5] Auth Intelligence Context Prepared")
 
     # PHASE 2: Parallel AI Analysis (Concurrent)
-    console.print("[bold yellow]Phase 2: Launching Parallel AI Analysts (Log, Auth, Net, Vuln)...[/bold yellow]")
+    console.print("[bold #00B7B5]Phase 2: Launching Parallel AI Analysts (Log, Auth, Net, Vuln)...[/bold #00B7B5]")
 
     def run_agent(agent_class, context):
         agent = agent_class()
@@ -366,23 +366,23 @@ def run_full_audit(timeframe: int, severity_threshold: str, paths: list = None):
         future_vuln = executor.submit(run_agent, VulnerabilityAnalysisAgent, vuln_context)
         future_log_sum = executor.submit(log_agent.generate_ai_summary, log_results.get("findings", []))
 
-        with console.status("[bold blue]Waiting for parallel AI results...[/bold blue]"):
+        with console.status("[bold #00B7B5]Waiting for parallel AI results...[/bold #00B7B5]"):
             auth_results = future_auth.result()
-            console.print("  [blue]|--[/blue] Authentication Intelligence: [green]OK[/green]")
+            console.print("  [#005461]|--[/#005461] Authentication Intelligence: [#00B7B5]OK[/#00B7B5]")
 
             net_results = future_net.result()
-            console.print("  [blue]|--[/blue] Network Patterns: [green]OK[/green]")
+            console.print("  [#005461]|--[/#005461] Network Patterns: [#00B7B5]OK[/#00B7B5]")
 
             vuln_results = future_vuln.result()
-            console.print("  [blue]|--[/blue] Vulnerability Assessment: [green]OK[/green]")
+            console.print("  [#005461]|--[/#005461] Vulnerability Assessment: [#00B7B5]OK[/#00B7B5]")
             
             log_ai_summary = future_log_sum.result()
-            console.print("  [blue]\\--[/blue] Log AI Summary: [green]OK[/green]")
+            console.print("  [#005461]\\--[/#005461] Log AI Summary: [#00B7B5]OK[/#00B7B5]")
 
     # PHASE 3: Super Agent Correlation (Sequential)
     super_agent = SuperAgent()
     
-    with console.status("[bold purple]Phase 3: Super Agent Correlation & Interpretation...[/bold purple]") as status:
+    with console.status("[bold #00B7B5]Phase 3: Super Agent Correlation & Interpretation...[/bold #00B7B5]") as status:
         raw_findings = log_results.get("findings", [])
         severity_breakdown = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
         top_finding_summaries = []
@@ -410,7 +410,7 @@ def run_full_audit(timeframe: int, severity_threshold: str, paths: list = None):
         }
 
         final_report = super_agent.analyze(str(summary_context))
-        console.print("[green]OK[/green] Full Audit Process Complete\n")
+        console.print("[#00B7B5]OK[/#00B7B5] Full Audit Process Complete\n")
 
     console.print(final_report)
 

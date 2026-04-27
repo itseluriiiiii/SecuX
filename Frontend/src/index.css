@@ -16,8 +16,8 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #131313;
-  color: #E5E2E1;
+  background: #000000;
+  color: #FFFFFF;
   overflow-x: hidden;
 }
 
@@ -26,38 +26,38 @@ h1, h2, h3, h4, .font-display {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #FFC793 0%, #FFA133 100%);
+  background: linear-gradient(135deg, #00B7B5 0%, #005461 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .glow-primary {
-  box-shadow: 0 0 40px rgba(255, 199, 147, 0.06);
+  box-shadow: 0 0 40px rgba(0, 183, 181, 0.08);
 }
 
 .glass {
-  background: rgba(160, 201, 255, 0.05); /* secondary_container at low opacity */
+  background: rgba(0, 84, 97, 0.1); 
   backdrop-filter: blur(20px) saturate(150%);
   border: none; /* No-Line Rule */
 }
 
 /* Ambient Radiance instead of shadows */
 .ambient-glow {
-  filter: drop-shadow(0 0 40px rgba(255, 199, 147, 0.08));
+  filter: drop-shadow(0 0 40px rgba(0, 183, 181, 0.1));
 }
 
 .grid-bg {
   background-image: 
-    linear-gradient(rgba(255, 199, 147, 0.01) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 199, 147, 0.01) 1px, transparent 1px);
+    linear-gradient(rgba(0, 183, 181, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 183, 181, 0.02) 1px, transparent 1px);
   background-size: 80px 80px;
 }
 
 .pulse-indicator {
   width: 8px;
   height: 8px;
-  background: #FFB4AB;
+  background: #00B7B5;
   border-radius: 50%;
   position: relative;
 }
@@ -70,7 +70,7 @@ h1, h2, h3, h4, .font-display {
   transform: translate(-50%, -50%);
   width: 100%;
   height: 100%;
-  border: 1px solid #FFB4AB;
+  border: 1px solid #00B7B5;
   border-radius: 50%;
   animation: pulse 2s infinite;
 }
@@ -92,7 +92,7 @@ h1, h2, h3, h4, .font-display {
   display: inline-block;
   width: 2px;
   height: 1.2em;
-  background: #FFC793;
+  background: #00B7B5;
   animation: blink 1s step-end infinite;
   vertical-align: text-bottom;
   margin-left: 2px;
@@ -125,10 +125,10 @@ body::after {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #353534;
+  background: #1A1A1A;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #FFC793;
+  background: #00B7B5;
 }
