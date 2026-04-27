@@ -27,6 +27,7 @@ SecuX is a high-performance, AI-driven cybersecurity orchestration platform. It 
 
 <p align="center">
   <img src="assets/audit_phases.png" alt="Audit Phases" width="700">
+  <img src="assets/audit_phases1.png" alt="Audit Phases" width="700">
 </p>
 
 SecuX features a rich, colorized terminal interface for maximum clarity during audits.
