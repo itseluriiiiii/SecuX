@@ -11,12 +11,38 @@ from secux.Network_Monitoring_Agent import NetworkMonitoringAgent
 from secux.Vulnerability_Analysis_Agent import VulnerabilityAnalysisAgent
 from secux.Super_Agent import SuperAgent
 from secux.config import get_system_config, get_available_log_files, format_timestamp
+from secux.collector import DataCollector
 
 
-@click.group()
+SECUX_BANNER = """
+ ███████╗███████╗ ██████╗██╗   ██╗██╗  ██╗
+ ██╔════╝██╔════╝██╔════╝██║   ██║╚██╗██╔╝
+ ███████╗█████╗  ██║     ██║   ██║ ╚███╔╝ 
+ ╚════██║██╔══╝  ██║     ██║   ██║ ██╔██╗ 
+ ███████║███████╗╚██████╗╚██████╔╝██╔╝ ██╗
+ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝
+"""
+
+def show_banner():
+    import sys
+    from rich.console import Console
+    # Force UTF-8 output for Windows compatibility with special characters
+    console = Console(
+        force_terminal=True,
+        file=open(sys.stdout.fileno(), mode='w', encoding='utf-8', closefd=False)
+    )
+    console.print(f"[bold green]{SECUX_BANNER}[/bold green]")
+    console.print("[bold green]   Multi-Agent Security Audit & Log Analysis System[/bold green]\n")
+
+@click.group(invoke_without_command=True)
 @click.version_option(version="0.1.0")
-def cli():
-    pass
+@click.pass_context
+def cli(ctx):
+    if ctx.invoked_subcommand is None:
+        show_banner()
+        click.echo(ctx.get_help())
+    else:
+        pass
 
 
 @cli.command("logscan")
@@ -248,9 +274,17 @@ def run_monitoring(
     default="LOW",
     help="Minimum severity threshold for report (default: LOW)"
 )
-def audit(timeframe: int, severity: str):
+@click.option(
+    "--paths",
+    "--path",
+    "-p",
+    multiple=True,
+    type=click.Path(exists=True),
+    help="Specific log file paths to analyze"
+)
+def audit(timeframe: int, severity: str, paths: tuple):
     """Run a full multi-agent security audit and super-agent summary."""
-    run_full_audit(timeframe, severity)
+    run_full_audit(timeframe, severity, paths=list(paths) if paths else None)
 
 
 @cli.command("auth-scan")
@@ -277,64 +311,104 @@ def vuln_scan(data: str):
     click.echo(agent.analyze(data))
 
 
-def run_full_audit(timeframe: int, severity_threshold: str):
+def run_full_audit(timeframe: int, severity_threshold: str, paths: list = None):
+    import sys
     from rich.console import Console
     from rich.status import Status
     from concurrent.futures import ThreadPoolExecutor
-    
-    console = Console()
+
+    # Force UTF-8 output to avoid Windows cp1252 charmap errors
+    console = Console(
+        highlight=False,
+        force_terminal=True,
+        file=open(sys.stdout.fileno(), mode='w', encoding='utf-8', closefd=False)
+    )
     console.print("\n[bold cyan]>>> Initializing Fast Parallel Multi-Agent Security Audit[/bold cyan]")
     console.print(f"[dim]Timeframe: {timeframe}h | Threshold: {severity_threshold}[/dim]\n")
 
-    # PHASE 1: Base Log Analysis (Sequential)
-    with console.status("[bold yellow]Phase 1: Running Base Log Analysis...[/bold yellow]") as status:
-        log_agent = LogAnalysisAgent(timeframe_hours=timeframe, severity_threshold=severity_threshold)
-        log_results = log_agent.run(show_summary=False)
-        console.print("[green]OK[/green] Log Analysis Complete")
+    # PHASE 1 & 1.5: Parallel Data Collection & Base Log Analysis
+    console.print("[bold yellow]Phase 1: Concurrent Data Collection & Log Analysis...[/bold yellow]")
+    collector = DataCollector()
+    log_agent = LogAnalysisAgent(timeframe_hours=timeframe, severity_threshold=severity_threshold)
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        # Start log analysis and system intelligence collection in parallel
+        future_log_results = executor.submit(log_agent.run, log_paths=paths, show_summary=False, skip_ai_summary=True)
+        future_net_data = executor.submit(collector.get_network_context)
+        future_vuln_data = executor.submit(collector.get_vulnerability_context)
+
+        with console.status("[bold blue]Collecting multi-source intelligence...[/bold blue]"):
+            log_results = future_log_results.result()
+            console.print("  [blue]|--[/blue] Base Log Analysis: [green]OK[/green]")
+            
+            net_context = future_net_data.result()
+            console.print("  [blue]|--[/blue] Network Context: [green]OK[/green]")
+            
+            vuln_context = future_vuln_data.result()
+            console.print("  [blue]|--[/blue] Vulnerability Context: [green]OK[/green]")
+
+    # PHASE 1.6: Dependent Data Collection (must follow Log Analysis)
+    with console.status("[bold yellow]Phase 1.5: Finalizing Auth Context...[/bold yellow]"):
+        auth_context = collector.get_auth_context(log_results.get("findings", []))
+        console.print("[green]OK[/green] Auth Intelligence Context Prepared")
 
     # PHASE 2: Parallel AI Analysis (Concurrent)
-    console.print("[bold yellow]Phase 2: Launching Parallel AI Analysts (Auth, Network, Vuln)...[/bold yellow]")
-    
-    # Prepare data for agents
-    auth_context = str(log_results.get("findings", []))[:2000]
-    net_context = str(log_results.get("system_info", {}))[:2000]
-    vuln_context = f"OS: {log_results.get('system_info', {}).get('os')}, Logs: {len(log_results.get('system_info', {}).get('logs_accessed', []))}"
+    console.print("[bold yellow]Phase 2: Launching Parallel AI Analysts (Log, Auth, Net, Vuln)...[/bold yellow]")
 
     def run_agent(agent_class, context):
         agent = agent_class()
         return agent.analyze(context)
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        # Submit all tasks
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        # Submit all AI tasks, including the Log AI Summary which we deferred
         future_auth = executor.submit(run_agent, AuthenticationAgent, auth_context)
         future_net = executor.submit(run_agent, NetworkMonitoringAgent, net_context)
         future_vuln = executor.submit(run_agent, VulnerabilityAnalysisAgent, vuln_context)
-        
-        # Wait for results
-        with console.status("[bold blue]Waiting for concurrent AI results...[/bold blue]"):
+        future_log_sum = executor.submit(log_agent.generate_ai_summary, log_results.get("findings", []))
+
+        with console.status("[bold blue]Waiting for parallel AI results...[/bold blue]"):
             auth_results = future_auth.result()
-            console.print("  [blue]├─[/blue] Authentication Intelligence: [green]OK[/green]")
-            
+            console.print("  [blue]|--[/blue] Authentication Intelligence: [green]OK[/green]")
+
             net_results = future_net.result()
-            console.print("  [blue]├─[/blue] Network Patterns: [green]OK[/green]")
-            
+            console.print("  [blue]|--[/blue] Network Patterns: [green]OK[/green]")
+
             vuln_results = future_vuln.result()
-            console.print("  [blue]└─[/blue] Vulnerability Assessment: [green]OK[/green]")
+            console.print("  [blue]|--[/blue] Vulnerability Assessment: [green]OK[/green]")
+            
+            log_ai_summary = future_log_sum.result()
+            console.print("  [blue]\\--[/blue] Log AI Summary: [green]OK[/green]")
 
     # PHASE 3: Super Agent Correlation (Sequential)
+    super_agent = SuperAgent()
+    
     with console.status("[bold purple]Phase 3: Super Agent Correlation & Interpretation...[/bold purple]") as status:
-        super_agent = SuperAgent()
+        raw_findings = log_results.get("findings", [])
+        severity_breakdown = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
+        top_finding_summaries = []
         
+        for f in raw_findings:
+            sev = f.get("severity", "LOW")
+            severity_breakdown[sev] = severity_breakdown.get(sev, 0) + 1
+            if len(top_finding_summaries) < 8:
+                ev = f.get("evidence", {})
+                top_finding_summaries.append(
+                    f"[{sev}] {f.get('type','?')} - {f.get('description','')[:120]} "
+                    f"(IP={ev.get('source_ip','N/A')}, user={ev.get('target_user','N/A')})"
+                )
+
         summary_context = {
             "log_analysis": {
-                "total_findings": len(log_results.get("findings", [])),
-                "top_findings": [f.get("description") for f in log_results.get("findings", [])[:5]]
+                "total_findings": len(raw_findings),
+                "severity_breakdown": severity_breakdown,
+                "top_findings": top_finding_summaries,
+                "ai_summary_excerpt": (log_ai_summary or "")[:1000], # Increased context
             },
-            "auth_intelligence": auth_results[:1000] if auth_results else "No significant findings",
-            "network_patterns": net_results[:1000] if net_results else "No unusual patterns",
-            "vulnerabilities": vuln_results[:1000] if vuln_results else "No critical weaknesses"
+            "auth_intelligence": (auth_results or "No significant auth findings")[:3000],
+            "network_patterns": (net_results or "No unusual network patterns detected")[:3000],
+            "vulnerabilities": (vuln_results or "No critical vulnerabilities identified")[:3000],
         }
-        
+
         final_report = super_agent.analyze(str(summary_context))
         console.print("[green]OK[/green] Full Audit Process Complete\n")
 
@@ -342,6 +416,7 @@ def run_full_audit(timeframe: int, severity_threshold: str):
 
 @cli.command("help")
 def help_cmd():
+    show_banner()
     click.echo("""
 SecuX Log Analysis Agent
 ========================
@@ -371,6 +446,7 @@ Logscan Options:
 Audit Options:
   -t, --timeframe HOURS      Timeframe to analyze (default: 24)
   -s, --severity LEVEL       Minimum severity threshold
+  -p, --path, --paths PATH   Specific log file paths
 
 Examples:
   secux logscan                          Analyze last 24 hours
@@ -379,14 +455,12 @@ Examples:
   secux logscan --output report.json     Save to file
   secux logscan --monitor                Continuous monitoring
   secux logscan --list-logs              Show available logs
+  secux audit --path test.log            Run full audit on specific file
 """)
 
 
 def main():
-    if len(sys.argv) > 1 and sys.argv[1] == "help":
-        help_cmd()
-    else:
-        cli()
+    cli()
 
 
 if __name__ == "__main__":

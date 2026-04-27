@@ -5,17 +5,21 @@ from .evtx import EVTXParser
 from .iis import IISParser
 from .syslog import SyslogParser
 from .json_log import JSONLogParser
+from .simple_text import SimpleTextParser
 
 
 class AutoDetectParser(BaseParser):
     
     def __init__(self):
         self.parsers: List[BaseParser] = [
+            SimpleTextParser(),
             EVTXParser(),
             IISParser(),
             SyslogParser(),
             JSONLogParser(),
         ]
+
+
     
     def can_parse(self, filepath: str) -> bool:
         return True

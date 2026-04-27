@@ -20,8 +20,11 @@ class JSONFormatter:
         timeframe_end: Optional[str],
         processing_duration: float,
         data_volume_mb: float,
-        access_errors: Optional[List[dict]] = None
+        access_errors: Optional[List[dict]] = None,
+        ai_summary: Optional[str] = None,
+        total_entries: int = 0
     ) -> dict:
+
         
         severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
         sorted_findings = sorted(
@@ -32,6 +35,7 @@ class JSONFormatter:
         return {
             "agent": agent_name,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "ai_summary": ai_summary,
             "system_info": {
                 "os": system_config.os,
                 "hostname": system_config.hostname,
@@ -43,7 +47,9 @@ class JSONFormatter:
             "stats": {
                 "total_logs_analyzed": len(logs_accessed),
                 "log_files_processed": sum(1 for l in logs_accessed if l.get("status") == "success"),
+                "total_entries": total_entries,
                 "anomalies_detected": len(findings),
+
                 "time_range": f"{timeframe_start} - {timeframe_end}" if timeframe_start and timeframe_end else "N/A",
                 "processing_duration": f"{processing_duration:.2f}",
                 "data_volume_processed": f"{data_volume_mb:.2f} MB"
@@ -67,30 +73,43 @@ class JSONFormatter:
                 existing["findings"].extend(new_findings)
                 existing["stats"]["anomalies_detected"] = len(existing["findings"])
                 existing["timestamp"] = datetime.now(timezone.utc).isoformat()
+                # Update AI summary if new one provided
+                if data.get("ai_summary"):
+                    existing["ai_summary"] = data["ai_summary"]
                 data = existing
         
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(self.to_json(data))
     
     def print_summary(self, data: dict) -> None:
+        import sys
         from rich.console import Console
         from rich.table import Table
         from rich.panel import Panel
-        
-        console = Console()
+        from rich.text import Text
+
+        # Force UTF-8 on Windows to prevent charmap codec errors with unicode chars
+        console = Console(highlight=False, force_terminal=True,
+                          stderr=False, file=open(sys.stdout.fileno(),
+                          mode='w', encoding='utf-8', closefd=False))
         
         severity_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
         for finding in data.get("findings", []):
             severity_counts[finding["severity"]] = severity_counts.get(finding["severity"], 0) + 1
         
+        # AI SUMMARY PANEL
+        if data.get("ai_summary"):
+            console.print("\n[bold purple]🧠 AI INSIGHTS (Mistral Small)[/bold purple]")
+            console.print(Panel(Text(data["ai_summary"], style="italic white"), border_style="purple"))
+
         table = Table(title="SecuX Log Analysis Summary", show_header=True, header_style="bold cyan")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="white")
         
         table.add_row("System", data["system_info"]["os"])
         table.add_row("Hostname", data["system_info"]["hostname"])
-        table.add_row("Logs Processed", str(data["stats"]["log_files_processed"]))
-        table.add_row("Total Events", str(data["stats"]["total_logs_analyzed"]))
+        table.add_row("Log Files", str(data["stats"]["log_files_processed"]))
+        table.add_row("Total Entries", str(data["stats"].get("total_entries", 0)))
         table.add_row("Anomalies Detected", str(data["stats"]["anomalies_detected"]))
         table.add_row("Processing Time", data["stats"]["processing_duration"] + "s")
         table.add_row("Data Volume", data["stats"]["data_volume_processed"])
@@ -130,3 +149,4 @@ class JSONFormatter:
                     expand=False
                 )
                 console.print(panel)
+

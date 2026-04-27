@@ -39,4 +39,4 @@ class NetworkMonitoringAgent:
 
     def analyze(self, data: str) -> str:
         prompt = self.PROMPT.format(data=data)
-        return self.llm.query(prompt)
+        return self.llm.query(prompt, agent_type="anomaly_detector")
