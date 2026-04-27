@@ -57,6 +57,7 @@ secux audit --timeframe 24h --threshold LOW
 
 ### Step-by-Step Installation
 
+<<<<<<< HEAD
 1. **Clone & Navigate**:
    ```bash
    git clone https://github.com/itseluriiiiii/SecuX.git
@@ -131,3 +132,10 @@ Priority-ranked remediation steps:
 
 > [!IMPORTANT]
 > **LEGAL DISCLAIMER**: This tool is for **authorized security testing and educational purposes only**. Usage against systems without prior consent is illegal and strictly prohibited. The developers assume no liability for misuse.
+=======
+### Execution Note
+If the `secux` command is not recognized (due to PATH issues), always use the `python -m` syntax:
+```powershell
+python -m secux.cli <command>
+```
+>>>>>>> ae476baba89b0052332e1fc7b3bc794bf1a222cb
